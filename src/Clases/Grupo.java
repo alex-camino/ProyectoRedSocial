@@ -174,7 +174,7 @@ public class Grupo {
 
 		/**
 		 * Metodo que busca todos los grupos donde esta un usuario
-		 * 
+		 * ,
 		 */
 		public static ArrayList<Grupo> mostrarGrupos(Usuario u, DB db) {
 

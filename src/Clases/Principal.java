@@ -387,7 +387,7 @@ public class Principal {
 	
 
 	private static void salirDelGrupo() {
-		// TODO Auto-generated method stub
+		// TODO Auto-generated method stub.
 		
 	}
 

@@ -3,7 +3,7 @@ package Clases;
 import java.util.InputMismatchException;
 
 public class Excepciones {
-	
+	//
 	public static int enteros(){
 		
 		int numero=0;

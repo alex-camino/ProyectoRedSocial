@@ -121,7 +121,7 @@ public class Usuario {
 			this.correo=usuario.get("correo").toString();
 			this.direccion=usuario.get("direccion").toString();
 			this.password=usuario.get("password").toString();
-			
+			//
 			return true;
 		}
 		

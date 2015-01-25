@@ -1,5 +1,8 @@
 package Clases;
 
+import java.util.ArrayList;
+import java.util.Date;
+
 import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
@@ -128,6 +131,55 @@ public class Usuario {
 		return false;
 	}
 	
+	/*
+	 * Método que añade el grupo al array de grupos en el usuario.
+	 * */
+	public void addGrupoUsuario(Usuario user, Grupo grupo_1, DB db){
+		
+		Date fechaCreacion = new Date();
+		
+		DBCollection collection = db.getCollection("usuario");		;	
+		
+		
+		BasicDBObject buscarUsuario = new BasicDBObject("_id", user.getId());
+
+		DBObject updateQuery = new BasicDBObject("$push", new BasicDBObject("grupos", new BasicDBObject("nombre", grupo_1.getNombre()).append("fecha", fechaCreacion)));
+
+		collection.update(buscarUsuario, updateQuery);
+
+		grupo_1.addUserGrupo(user, db);
+	}
+	
+	/*
+	 * Método que añade un grupo al array de usuarios.
+	 * */
+	public void unirseGrupo(Usuario user, DB db) {
+		
+		ArrayList<Grupo> grupos= Grupo.gruposDisponibles(user, db);
+		
+		int opcion;
+		
+		System.out.println("A que grupo te quieres unir??");
+		
+		for(int i=0;i<grupos.size();i++){
+			
+			System.out.println((i+1)+"-. "+grupos.get(i).getNombre());
+		}
+		
+		opcion=Excepciones.enteros();
+		
+		if(opcion<=0 || opcion>grupos.size()){
+			
+			System.out.println("Solo puedes unirte a uno de estos grupos.");
+		}else{
+			
+			addGrupoUsuario(user,grupos.get(opcion-1),db);
+		}	
+		
+		
+	}
+	
+	/*
 	public void addComentario(Grupo grupo, String comentario, DB db) {
 
 		BasicDBObject buscarUsuario = new BasicDBObject("_id", this.id);
@@ -138,7 +190,7 @@ public class Usuario {
 
 		grupo.incrementarComentario(db);
 
-	}
+	}*/
 	
 	public void bajaUsuario(DB db) {
 
@@ -148,5 +200,7 @@ public class Usuario {
 		this.collection.remove(query);
 
 	}
+	
+	
 	
 }

@@ -8,6 +8,7 @@ import java.util.Scanner;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
@@ -269,7 +270,7 @@ public class Principal {
 			
 			case 2:
 				
-					//unirseGrupo(user);
+					user.unirseGrupo(user, db);
 				break;
 			case 3:
 				
@@ -309,6 +310,7 @@ public class Principal {
 
 	
 	///////////////// OPCIONES DE GRUPO //////////////////////////////////////
+	
 	private static void crearGrupo(Usuario user) {
 		
 
@@ -320,26 +322,10 @@ public class Principal {
 
 		g.crearGrupo(nombreGrupo, db, user);
 		
-		addGrupoUsuario(user,g);
+		
 	}
 	
-	/*
-	 * Método que añade el grupo al array de grupos en el usuario.
-	 * */
-	public static void addGrupoUsuario(Usuario user, Grupo grupo_1){
-		
-		Date fechaCreacion = new Date();
-		
-		DBCollection collection = db.getCollection("usuario");		;	
-		
-		
-		BasicDBObject buscarUsuario = new BasicDBObject("_id", user.getId());
-
-		DBObject updateQuery = new BasicDBObject("$push", new BasicDBObject("grupos", new BasicDBObject("nombre", grupo_1.getNombre()).append("fecha", fechaCreacion)));
-
-		collection.update(buscarUsuario, updateQuery);
-
-	}
+	
 	private static void comentarGrupo(Usuario user) {
 		
 		System.out.println("Puedes comentar en los siguientes grupos: ");
@@ -347,7 +333,7 @@ public class Principal {
 		//Llamamos al metodo mostrar grupos a partir de un usuario
 		ArrayList<Grupo> grupos = Grupo.mostrarGrupos(user, db);
 
-		int opcion;
+		int opcion=0;
 		boolean repetir=true;
 
 		do {
@@ -355,13 +341,13 @@ public class Principal {
 			
 			for (int i = 0; i < grupos.size(); i++) {
 
-				System.err.print((i + 1)+ "-. "); 
+				System.out.print((i + 1)+ "-. "); 
 				System.out.println(grupos.get(i).getNombre());
 
 			}
 
 			System.out.print("Introduzca el grupo en el que desea comentar : ");
-			opcion = Integer.parseInt(lector.nextLine());
+			opcion = Excepciones.enteros();
 
 			if (opcion<1 || opcion>grupos.size()) {
 
@@ -376,7 +362,7 @@ public class Principal {
 
 				String comentario = lector.nextLine();
 
-				user.addComentario(grupos.get(opcion - 1), comentario, db);
+				grupos.get(opcion-1).addComentarioGrupo(user, db, comentario);
 
 			}
 			
@@ -401,15 +387,11 @@ public class Principal {
 		
 	}
 
-	private static void unirseGrupo() {
-		// TODO Auto-generated method stub
-		
-	}
-
 	private static void eliminarGrupo() {
 		// TODO Auto-generated method stub
 		
 	}
+	
 
 	
 	

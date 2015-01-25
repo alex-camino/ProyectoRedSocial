@@ -1,7 +1,10 @@
 package Clases;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+
+import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -68,6 +71,8 @@ public class Grupo {
 		}
 
 		
+		///////////////////////////// METODOS //////////////////////////////////
+		
 		/**
 		 * Metodo que crea un grupo
 		 *
@@ -79,10 +84,11 @@ public class Grupo {
 			BasicDBObject doc = new BasicDBObject();
 			doc.put("_id", nombre);
 			doc.put("usuarios",
-					new BasicDBObject(new BasicDBObject("usuario", user.getId())
-							.append("fecha_ingreso", fechaCreacion).append("administrador", true)));
+					Arrays.asList(new BasicDBObject("usuario", user.getId()).append(
+							"fecha_ingreso", fechaCreacion).append("admin", true)));
 			doc.put("cantidad_usuarios", 1);
 			doc.put("cantidad_comentarios", 0);
+
 
 			this.collection = db.getCollection("grupo");
 			collection.save(doc);
@@ -92,9 +98,84 @@ public class Grupo {
 		}
 
 		
+		/*
+		 * Método que añade un usuario en el grupo en el que estamos.
+		 * */
+		public void addUserGrupo(Usuario user, DB db){
+			
+			this.collection = db.getCollection("grupo");
+			
+			Date fechaCreacion = new Date();
+			
+			//Busco el grupo en el que estamos para luego poder realizar el update.
+			BasicDBObject buscarGrupo = new BasicDBObject("_id", this.nombre);
+			
+			DBObject updateQuery = new BasicDBObject("$push", new BasicDBObject("usuarios", 
+					new BasicDBObject("usuario", user.getId()).append("fecha_ingreso", fechaCreacion).append("admin", false)));
+			
+			this.collection.update(buscarGrupo, updateQuery);
+			
+			this.incrementarUsuarios(db);
+		}
+		
+		public void addComentarioGrupo(Usuario user, DB db, String textoComentario){
+			
+			this.collection = db.getCollection("grupo");
+			
+			Date fechaCreacion = new Date();
+
+			//Busco el grupo en el que estamos para luego poder realizar el update.
+			BasicDBObject buscarGrupo = new BasicDBObject("_id", this.nombre);
+			
+			DBObject updateQuery = new BasicDBObject("$push", new BasicDBObject("comentario", new BasicDBObject("texto", textoComentario).append(
+							"usuario", user.getId()).append("fecha", fechaCreacion)));
+			
+			this.collection.update(buscarGrupo, updateQuery);
+			
+			this.incrementarComentario(db);
+			
+			
+		}
+		
+		//Incremento en uno el campo cantidad_usuarios, cada vez que se añade un usuario al grupo.
+		public void incrementarUsuarios(DB db) {
+			
+			this.collection = db.getCollection("grupo");
+
+			this.cantidad_usuarios++;
+
+			BasicDBObject buscarGrupo = new BasicDBObject("_id", this.nombre);
+
+			DBObject updateQuery = new BasicDBObject("$set", new BasicDBObject(
+					"cantidad_usuarios", this.cantidad_usuarios));
+			
+			this.collection.update(buscarGrupo, updateQuery);
+
+		}
+		
 		/**
-		 * Borrado de Grupo
-		 * @param db
+		 * Incremento en uno los comentarios escritos
+		 * 
+		 */
+		public void incrementarComentario(DB db) {
+
+			this.collection = db.getCollection("grupo");
+			
+			this.cantidad_comentarios++;
+
+			BasicDBObject buscarGrupo = new BasicDBObject("_id", this.nombre);
+
+			DBObject updateQuery = new BasicDBObject("$set", new BasicDBObject(
+					"cantidad_comentarios", this.cantidad_comentarios));
+			
+			this.collection.update(buscarGrupo, updateQuery);
+
+		}
+		
+		
+		/**
+		 * Borrar Grupo
+		 * 
 		 */
 		public void borrarGrupo(DB db) {
 
@@ -106,22 +187,7 @@ public class Grupo {
 
 		}
 
-		/**
-		 * Incremento de los comentarios escritos
-		 * @param db
-		 */
-		public void incrementarComentario(DB db) {
-
-			this.cantidad_comentarios++;
-
-			BasicDBObject busqueda = new BasicDBObject("_id", this.nombre);
-
-			DBObject updateQuery = new BasicDBObject("$set", new BasicDBObject(
-					"total_comentarios", this.cantidad_comentarios));
-			this.collection = db.getCollection("grupo");
-			this.collection.update(busqueda, updateQuery);
-
-		}
+		
 		
 		/**
 		 * Quitar usuario del grupo
@@ -141,9 +207,7 @@ public class Grupo {
 
 		/**
 		 * Mostrar grupos en los que el usuario es administrador
-		 * @param user
-		 * @param db
-		 * @return
+		 * 
 		 */
 		public static ArrayList<Grupo> mostrarGruposAdmin(Usuario user, DB db) {
 
@@ -173,7 +237,8 @@ public class Grupo {
 		}
 
 		/**
-		 * Metodo que busca todos los grupos donde esta un usuario
+		 * Metodo que busca todos los grupos donde esta un usuario, para que pueda
+		 * escoger en cual comenta.
 		 * ,
 		 */
 		public static ArrayList<Grupo> mostrarGrupos(Usuario u, DB db) {
@@ -189,8 +254,7 @@ public class Grupo {
 			
 			for (DBObject grupo : cursor) {
 
-				//ObjectId id = (ObjectId) grupo.get("_id");
-				String nombre = (String) grupo.get("nombre");
+				String nombre = (String) grupo.get("_id");
 				int cantidad_usuarios = (int) grupo.get("cantidad_usuarios");
 				int cantidad_comentarios = (int) grupo.get("cantidad_comentarios");
 
@@ -198,6 +262,37 @@ public class Grupo {
 
 			}
 
+			return grupos;
+
+		}
+		
+
+		/*
+		 * Método que busca los grupos en los que el usuario no esta inscrito.
+		 * */
+		public static ArrayList<Grupo> gruposDisponibles(Usuario user, DB db) {
+
+
+			ArrayList<Grupo> grupos = new ArrayList<>();
+
+			BasicDBObject query = new BasicDBObject(new BasicDBObject("usuarios",
+					new BasicDBObject("$not", new BasicDBObject("$elemMatch",
+							new BasicDBObject("usuario", user.getId())))));
+			
+			DBCollection col = db.getCollection("grupo");
+			DBCursor cursor = col.find(query);
+			
+			for (DBObject grupo : cursor) {
+
+				String nombre = (String) grupo.get("_id");
+				int total_usuarios = (int) grupo.get("cantidad_usuarios");
+				int total_comentarios = (int) grupo.get("cantidad_comentarios");
+
+				
+				grupos.add(new Grupo(nombre, total_usuarios, total_comentarios));
+
+			}
+			
 			return grupos;
 
 		}

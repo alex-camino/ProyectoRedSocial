@@ -1,5 +1,7 @@
 package Clases;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -118,6 +120,9 @@ public class Grupo {
 			this.incrementarUsuarios(db);
 		}
 		
+		/*
+		 * Agrega un comentario a partir de un usuario en un grupo determinado.
+		 * */
 		public void addComentarioGrupo(Usuario user, DB db, String textoComentario){
 			
 			this.collection = db.getCollection("grupo");
@@ -135,6 +140,53 @@ public class Grupo {
 			this.incrementarComentario(db);
 			
 			
+		}
+		
+		/*
+		 * Mostrara los comentarios de un usuario a partir de un grupo.
+		 * */
+		public void mostrarComentariosUsuario(Usuario user, DB db){
+
+			String texto;
+			ObjectId idUsuario;
+			DateFormat fechaFormateada = new SimpleDateFormat("EEEE MMMM d HH:mm:ss z yyyy");
+			Date fecha = null;
+			
+			
+			this.collection = db.getCollection("grupo");
+			
+			//Busco el grupo en el que estamos para luego poder visualizar todos los comentarios.
+			BasicDBObject buscarGrupo = new BasicDBObject("_id", this.nombre);
+			
+			DBCursor cursor = collection.find(buscarGrupo);
+			
+			for (DBObject grupo : cursor) {
+
+				ArrayList<DBObject> comentarios = (ArrayList<DBObject>) grupo.get("comentario");
+				
+				if(comentarios!=null){
+					
+					for(int i=0;i<comentarios.size();i++){
+						
+						texto=(String)comentarios.get(i).get("texto");
+						idUsuario=(ObjectId) comentarios.get(i).get("usuario");
+						fecha=(Date) comentarios.get(i).get("fecha");
+						
+						//Creo un nuevo usuario para poder averiguar los datos del usuario.
+						Usuario nuevoUser = new Usuario();
+						nuevoUser.buscarInfoUsuario(idUsuario, db);
+						
+						System.out.println("Usuario: "+nuevoUser.getNombre()+" "+nuevoUser.getApellidos());
+						System.out.println("Comentario: "+texto);
+						System.out.println("Fecha: "+fechaFormateada.format(fecha));
+					}
+					
+				}else{
+					
+					System.out.println("El grupo no tiene comentarios.");
+				}
+
+			}
 		}
 		
 		//Incremento en uno el campo cantidad_usuarios, cada vez que se añade un usuario al grupo.
@@ -192,17 +244,18 @@ public class Grupo {
 		/**
 		 * Quitar usuario del grupo
 		 */
-		public void abandonarGrupo(Usuario u, DB db){
+		public void abandonarGrupo(Usuario user, DB db){
 
 			BasicDBObject busqueda = new BasicDBObject("_id", this.nombre);
 
-			DBObject updateQuery = new BasicDBObject("$pull", new BasicDBObject("usuarios", new BasicDBObject("usuario", u.getId())));
+			DBObject updateQuery = new BasicDBObject("$pull", new BasicDBObject("usuarios", new BasicDBObject("usuario", user.getId())));
 			System.out.println(updateQuery);
 			this.collection = db.getCollection("grupo");
 			this.collection.update(busqueda, updateQuery);
 			
 		}
 
+		
 		///////////////////////////////////////////////METODOS STATIC///////////////////////////////////////////////////
 
 		/**
@@ -241,12 +294,12 @@ public class Grupo {
 		 * escoger en cual comenta.
 		 * ,
 		 */
-		public static ArrayList<Grupo> mostrarGrupos(Usuario u, DB db) {
+		public static ArrayList<Grupo> mostrarGrupos(Usuario user, DB db) {
 
 			ArrayList<Grupo> grupos = new ArrayList<>();
 
 			BasicDBObject query = new BasicDBObject();
-			query.put("usuarios.usuario", u.getId());
+			query.put("usuarios.usuario", user.getId());
 
 			DBCollection col = db.getCollection("grupo");
 

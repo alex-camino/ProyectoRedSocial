@@ -20,7 +20,7 @@ public class Usuario {
 	private String nombre;
 	private String apellidos;
 	private String correo;
-	private String direccion;
+	private String[] direccion=new String[4];
 	private String password;
 	
 	
@@ -28,7 +28,19 @@ public class Usuario {
 	public Usuario(){
 		
 	}
-	
+	public Usuario(ObjectId id, String nombre, String apellidos, String correo,String password, String[] direccion) {
+
+		this.id = id;
+		this.nombre = nombre;
+		this.apellidos = apellidos;
+		this.correo = correo;
+		this.password = password;
+		this.direccion[0] = direccion[0];
+		this.direccion[1] = direccion[1];
+		this.direccion[2] = direccion[2];
+		this.direccion[3] = direccion[3];
+
+	}
 	public void crearUsuario(String nombre, String apellidos, String correo, String[] direccion, String password, DB db){
 		
 		/* Con la clase BasicDBObject creamos objetos Mongo y lo insertamos en la coleccion "user" */
@@ -37,7 +49,11 @@ public class Usuario {
 	        doc.put("nombre", nombre);
 	        doc.put("apellidos",apellidos);
 	        doc.put("correo", correo);
-	        doc.put("direccion", direccion);
+	        doc.put("direccion",
+					new BasicDBObject("calle", direccion[0])
+							.append("numero", direccion[1])
+							.append("localidad", direccion[2])
+							.append("codigo postal", direccion[3]));
 	        doc.put("password", password);
 	        
 	    this.collection = db.getCollection("usuario");				
@@ -81,11 +97,11 @@ public class Usuario {
 		this.correo = correo;
 	}
 
-	public String getDireccion() {
+	public String[] getDireccion() {
 		return direccion;
 	}
 
-	public void setDireccion(String direccion) {
+	public void setDireccion(String[] direccion) {
 		this.direccion = direccion;
 	}
 
@@ -122,7 +138,13 @@ public class Usuario {
 			this.nombre=usuario.get("nombre").toString();
 			this.apellidos=usuario.get("apellidos").toString();
 			this.correo=usuario.get("correo").toString();
-			this.direccion=usuario.get("direccion").toString();
+			DBObject direccion = (DBObject) usuario.get("direccion");
+
+			this.direccion[0] = (String) direccion.get("calle");
+			this.direccion[1] = (String) direccion.get("numero");
+			this.direccion[2] = (String) direccion.get("localidad");
+			this.direccion[3] = (String) direccion.get("codigo postal");
+			
 			this.password=usuario.get("password").toString();
 			
 			return true;
@@ -177,6 +199,36 @@ public class Usuario {
 		}	
 		
 		
+	}
+	
+	/*
+	 * Buscar información de un usuario a partir de un ID.
+	 * */
+	
+	public void buscarInfoUsuario(ObjectId idUsuario, DB db){
+		
+		this.collection = db.getCollection("usuario");
+		
+		//Busco el usuario para luego poder visualizar toda su informacion
+		BasicDBObject buscarUsuario = new BasicDBObject("_id", idUsuario);
+		
+		DBCursor cursor = collection.find(buscarUsuario);
+		
+		for (DBObject usuario : cursor) {
+
+			this.id=(ObjectId) usuario.get("_id");
+			this.nombre=(String) usuario.get("nombre");
+			this.apellidos=(String) usuario.get("apellidos");
+			this.correo=(String) usuario.get("correo");
+			DBObject direccion = (DBObject) usuario.get("direccion");
+
+			this.direccion[0] = (String) direccion.get("calle");
+			this.direccion[1] = (String) direccion.get("numero");
+			this.direccion[2] = (String) direccion.get("localidad");
+			this.direccion[3] = (String) direccion.get("codigo postal");
+			
+			this.password=(String) usuario.get("password");
+		}
 	}
 	
 	/*

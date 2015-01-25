@@ -284,7 +284,7 @@ public class Principal {
 		
 			case 5:
 					
-					//visualizarGrupos();
+					visualizarComentariosGrupos(user);
 				break;
 				
 			
@@ -334,7 +334,7 @@ public class Principal {
 		ArrayList<Grupo> grupos = Grupo.mostrarGrupos(user, db);
 
 		int opcion=0;
-		boolean repetir=true;
+		boolean repetir;
 
 		do {
 
@@ -367,10 +367,51 @@ public class Principal {
 			}
 			
 
-		} while (opcion == -1);
+		} while (repetir);
 	}
 		
-	
+	private static void visualizarComentariosGrupos(Usuario user) {
+		
+		System.out.println("Puedes visualizar los comentarios de uno de los siguientes grupos: ");
+
+		//Llamamos al metodo mostrar grupos a partir de un usuario
+		ArrayList<Grupo> grupos = Grupo.mostrarGrupos(user, db);
+
+		int opcion=0;
+		boolean repetir;
+
+		do {
+
+			
+			for (int i = 0; i < grupos.size(); i++) {
+
+				System.out.print((i + 1)+ "-. "); 
+				System.out.println(grupos.get(i).getNombre());
+
+			}
+
+			System.out.print("Introduzca el grupo en el que desea comentar : ");
+			opcion = Excepciones.enteros();
+
+			if (opcion<1 || opcion>grupos.size()) {
+
+				System.err.println("Tiene que escoger uno de los grupos que aparecen.");
+				repetir=true;
+
+			} else {
+
+				repetir=false;
+				
+				
+
+				grupos.get(opcion-1).mostrarComentariosUsuario(user, db);
+
+			}
+			
+
+		} while (repetir);
+		
+	}
 
 	private static void salirDelGrupo() {
 		// TODO Auto-generated method stub.
@@ -382,10 +423,7 @@ public class Principal {
 		
 	}
 
-	private static void visualizarGrupos() {
-		// TODO Auto-generated method stub
-		
-	}
+	
 
 	private static void eliminarGrupo() {
 		// TODO Auto-generated method stub

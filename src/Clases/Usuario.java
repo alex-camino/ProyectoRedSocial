@@ -180,23 +180,38 @@ public class Usuario {
 		ArrayList<Grupo> grupos= Grupo.gruposDisponibles(user, db);
 		
 		int opcion;
+		boolean repetir=false;
 		
 		System.out.println("A que grupo te quieres unir??");
 		
-		for(int i=0;i<grupos.size();i++){
+		do{
 			
-			System.out.println((i+1)+"-. "+grupos.get(i).getNombre());
-		}
-		
-		opcion=Excepciones.enteros();
-		
-		if(opcion<=0 || opcion>grupos.size()){
+			for(int i=0;i<grupos.size();i++){
+				
+				System.out.println((i+1)+"-. "+grupos.get(i).getNombre());
+			}
+				System.out.println("0-. Volver al menú.");
+				System.out.println(" ");
+				
+			opcion=Excepciones.enteros();
 			
-			System.out.println("Solo puedes unirte a uno de estos grupos.");
-		}else{
+			if(opcion==0){
+				
+				repetir=false;
+				
+				System.out.println("Volviendo al menú usuario.");
+			}else if(opcion<0 || opcion>grupos.size()){
+				
+				repetir=true;
+				System.out.println("Solo puedes unirte a uno de estos grupos.");
+			}else{
+				
+				repetir=false;
+				addGrupoUsuario(user,grupos.get(opcion-1),db);
+			}	
 			
-			addGrupoUsuario(user,grupos.get(opcion-1),db);
-		}	
+			
+		}while(repetir);
 		
 		
 	}
@@ -231,18 +246,6 @@ public class Usuario {
 		}
 	}
 	
-	/*
-	public void addComentario(Grupo grupo, String comentario, DB db) {
-
-		BasicDBObject buscarUsuario = new BasicDBObject("_id", this.id);
-
-		DBObject updateQuery = new BasicDBObject("$push", new BasicDBObject("comentario", new BasicDBObject("texto", comentario).append("grupo", grupo.getNombre())));
-
-		collection.update(buscarUsuario, updateQuery);
-
-		grupo.incrementarComentario(db);
-
-	}*/
 	
 	public void bajaUsuario(DB db) {
 

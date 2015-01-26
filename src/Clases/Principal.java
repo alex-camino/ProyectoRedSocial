@@ -177,61 +177,44 @@ public class Principal {
 	
 	private static void bajaUsuario(Usuario user) {
 		
-		
-		String respuesta = "No";
-		
-		while (true) {
 
-			ArrayList<Grupo> grupos = Grupo.mostrarGruposAdmin(user, db);
-			
-			
-			// Averiguar si el usuario es administrador de algun grupo.
-			
-			if(grupos.size()>0){
-			
-				System.out.println(user.getNombre() + " eres administrador de los siguientes grupos: ");
-				
-				for(int i=0; i<grupos.size(); i++){
-					
-					System.out.println(grupos.get(i).getNombre());
-				
-				}
-				
-				System.out.println("Si te das de baja, se te eliminará como Adminstrador de los grupos pasando a ser Administrador el siguiente usuario.");
-				
-			}
+		//Llamamos al metodo mostrar grupos a partir de un usuario
+		ArrayList<Grupo> grupos = Grupo.mostrarGrupos(user, db);
+
+		String respuesta;
+		boolean repetir;
+		do{
 			
 			System.out.println("Seguro que desea darse de baja de la RED-SOCIAL??? si / no");
 			respuesta = lector.nextLine();
 
-			if (Character.toString(respuesta.charAt(0)).equalsIgnoreCase("S")||Character.toString(respuesta.charAt(0)).equalsIgnoreCase("s")) {
+			
+			if (respuesta.equalsIgnoreCase("si")){
 				
-				//llamamos al metodo de darse de baja de la clase usuario.
-				user.bajaUsuario(db);
+				repetir=false;
 				
-				//Recorremos todos los grupos para poder quitar como administrador del grupo al Usuario
-				if(grupos.size()>0){
+				for (int i = 0; i < grupos.size(); i++) {
 					
-					for(int i=0; i<grupos.size(); i++){
-						
-						grupos.get(i).abandonarGrupo(user, db);
-					
-					}
-						
+					grupos.get(i).abandonarGrupo(user, db);
 				}
+				System.out.println("La información de los grupos ha sido eliminada.");
 				
-				System.out.println("Se le ha eliminado de la BBDD de la RED-SOCIAL.");
+				user.bajaUsuario(db);
+				System.out.println("EL USUARIO HA SIDO ELIMINADO DE LA RED SOCIAL CORRECTAMENTE.");
+			}else if(respuesta.equalsIgnoreCase("no")){
 				
+				System.out.println(user.getNombre()+" "+user.getApellidos()+", se ha cancelado la operación. Gracias por confiar en nosotros.");
+				repetir=false;
 				
-			} else if (Character.toString(respuesta.charAt(0)).equalsIgnoreCase("N")||Character.toString(respuesta.charAt(0)).equalsIgnoreCase("n")) {
+			}else{
 				
-				System.out.println("Gracias por seguir con nosotros :), se le devolvera al menu");
-				
+				System.out.println("La respuesta introducida es incorrecta.");
+				repetir=true;
 			}
-
-			System.out.println("La respuesta no es correcta.");
-		}
-
+			
+		}while(repetir);
+		
+				
 	}
 
 	
@@ -281,7 +264,7 @@ public class Principal {
 					
 			case 4:
 					
-					//eliminarGrupo();
+					eliminarGrupo(user);
 				break;
 		
 			case 5:
@@ -304,7 +287,7 @@ public class Principal {
 				
 			case 8:
 				
-				//salirDelGrupo();
+					salirDelGrupo(user);
 				
 			break;
 			
@@ -322,13 +305,28 @@ public class Principal {
 	private static void crearGrupo(Usuario user) {
 		
 
+		
 		String nombreGrupo = "";
 		Grupo g = new Grupo();
+		boolean repetir;
+		do{
+			
+			System.out.print("Introduzca el nombre del grupo que desea crear: ");
+			nombreGrupo = lector.nextLine();
 
-		System.out.print("Introduzca el nombre del grupo que desea crear: ");
-		nombreGrupo = lector.nextLine();
-
-		g.crearGrupo(nombreGrupo, db, user);
+			if(g.comprobarGrupo(nombreGrupo, db)){
+				
+				System.err.println("Ese nombre de grupo ya esta en uso, introduzca otro.");
+				repetir=true;
+			}else{
+				
+				g.crearGrupo(nombreGrupo, db, user);
+				repetir=false;
+				
+			}
+			
+		}while(repetir);
+		
 		
 		
 	}
@@ -354,10 +352,20 @@ public class Principal {
 
 			}
 
+				System.out.println("0-. Volver al menú.");
+				System.out.println(" ");
+				
 			System.out.print("Introduzca el grupo en el que desea comentar : ");
 			opcion = Excepciones.enteros();
 
-			if (opcion<1 || opcion>grupos.size()) {
+			
+			if(opcion==0){
+				
+				repetir=false;
+				
+				System.out.println("Volviendo al menú usuario.");
+				
+			}else if (opcion<1 || opcion>grupos.size()) {
 
 				System.err.println("Tiene que escoger uno de los grupos que aparecen.");
 				repetir=true;
@@ -398,10 +406,21 @@ public class Principal {
 
 			}
 
+			
+				System.out.println("0-. Volver al menú.");
+				System.out.println(" ");
+				
 			System.out.print("Introduzca el grupo en el que desea buscar los comentarios : ");
 			opcion = Excepciones.enteros();
 
-			if (opcion<1 || opcion>grupos.size()) {
+			
+			if(opcion==0){
+				
+				repetir=false;
+				
+				System.out.println("Volviendo al menú usuario.");
+				
+			}else if (opcion<1 || opcion>grupos.size()) {
 
 				System.err.println("Tiene que escoger uno de los grupos que aparecen.");
 				repetir=true;
@@ -444,10 +463,20 @@ public class Principal {
 
 			}
 
+				System.out.println("0-. Volver al menú.");
+				System.out.println(" ");
+			
 			System.out.print("Introduzca el grupo en el que desea buscar los usuarios : ");
 			opcion = Excepciones.enteros();
 
-			if (opcion<1 || opcion>grupos.size()) {
+			
+			if(opcion==0){
+				
+				repetir=false;
+				
+				System.out.println("Volviendo al menú usuario.");
+				
+			}else if (opcion<1 || opcion>grupos.size()) {
 
 				System.err.println("Tiene que escoger uno de los grupos que aparecen.");
 				repetir=true;
@@ -467,7 +496,7 @@ public class Principal {
 	}
 	
 	/*
-	 * 
+	 * Método que devuelve la cantidad de usuarios que tiene el grupo.
 	 * */
 	
 	private static void cantidadUsuariosGrupo(Usuario user) {
@@ -491,10 +520,19 @@ public class Principal {
 
 			}
 
+				System.out.println("0-. Volver al menú.");
+				System.out.println(" ");
+				
 			System.out.print("Introduzca el grupo del que desees saber la cantidad de usuarios que tiene : ");
 			opcion = Excepciones.enteros();
 
-			if (opcion<1 || opcion>grupos.size()) {
+			if(opcion==0){
+				
+				repetir=false;
+				
+				System.out.println("Volviendo al menú usuario.");
+				
+			}else if (opcion<1 || opcion>grupos.size()) {
 
 				System.err.println("Tiene que escoger uno de los grupos que aparecen.");
 				repetir=true;
@@ -511,20 +549,119 @@ public class Principal {
 		} while (repetir);
 		
 	}
-	private static void salirDelGrupo() {
-		// TODO Auto-generated method stub.
+	private static void salirDelGrupo(Usuario user) {
+		
+		
+		//Llamamos al metodo mostrar grupos en los que esta el usuario a partir de un usuario
+		ArrayList<Grupo> grupos = Grupo.mostrarGrupos(user, db);
+		int opcion=0;
+		boolean repetir;
+		
+		
+		//Mostramos los grupos en los que el usuario esta unido
+		if(grupos.size()!=0){
+		
+			System.out.println("Usted esta unido en los siguientes grupos: ");
+			
+			for(int i=0;i<grupos.size();i++){
+				
+				System.out.println((i+1)+"-. "+grupos.get(i).getNombre());
+			}
+			
+				System.out.println("0-. Volver al menú.");
+				System.out.println(" ");
+			do {
+
+				System.out.print("Introduzca el grupo del que desees darte de baja : ");
+				opcion = Excepciones.enteros();
+
+				
+				if(opcion==0){
+					
+					repetir=false;
+					
+					System.out.println("Volviendo al menú usuario.");
+					
+				}else if (opcion<1 || opcion>grupos.size()) {
+
+					System.err.println("Tiene que escoger uno de los grupos que aparecen.");
+					repetir=true;
+
+				} else {
+
+					repetir=false;
+
+					grupos.get(opcion-1).abandonarGrupo(user, db);
+
+				}
+				
+
+			} while (repetir);
+			
+			
+			
+		}else{
+			
+			System.out.println("Usted no esta unido en ningún grupo.");
+		}
 		
 	}
 
-	private static void listarUsuarios() {
-		// TODO Auto-generated method stub
+
+	private static void eliminarGrupo(Usuario user) {
 		
-	}
+		//Llamamos al metodo mostrar grupos Administrador en los que el usuario es Admin
+		ArrayList<Grupo> grupos = Grupo.mostrarGruposAdmin(user, db);
+		int opcion=0;
+		boolean repetir;
+		
+		
+		//Mostramos los grupos en los que el usuario esta unido
+		if(grupos.size()!= 0){
+		
+			System.out.println("Usted es Administrador de los siguientes grupos: ");
+			
+			for(int i=0;i<grupos.size();i++){
+				
+				System.out.println((i+1)+"-. "+grupos.get(i).getNombre());
+			}
+			
+				System.out.println("0-. Volver al menú.");
+				System.out.println(" ");
+			do {
 
-	
+				System.out.print("Introduzca el grupo del que desees darte de baja : ");
+				opcion = Excepciones.enteros();
 
-	private static void eliminarGrupo() {
-		// TODO Auto-generated method stub
+				if(opcion==0){
+					
+					repetir=false;
+					
+					System.out.println("Volviendo al menú usuario.");
+					
+				}else if (opcion<1 || opcion>grupos.size()) {
+
+					System.err.println("Tiene que escoger uno de los grupos que aparecen.");
+					repetir=true;
+
+				} else {
+
+					repetir=false;
+
+					grupos.get(opcion-1).borrarGrupo(db);
+
+					System.out.println("El grupo se ha borrado correctamente.");
+				}
+				
+
+			} while (repetir);
+			
+			
+			
+		}else{
+			
+			System.out.println("Usted no es Administrador de ningun grupo.");
+		}
 		
 	}
 	

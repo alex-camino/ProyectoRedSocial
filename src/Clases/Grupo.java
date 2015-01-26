@@ -75,6 +75,25 @@ public class Grupo {
 		
 		///////////////////////////// METODOS //////////////////////////////////
 		
+		/*
+		 * 
+		 * */
+		public boolean comprobarGrupo(String nombre, DB db){
+			
+			this.collection=db.getCollection("grupo");
+			//Busco el grupo en el que estamos para luego poder visualizar todos los comentarios.
+			BasicDBObject buscarGrupo = new BasicDBObject("_id", nombre);
+			
+			DBCursor cursor = collection.find(buscarGrupo);
+			
+			for (DBObject grupo : cursor) {
+				
+				return true;
+			}
+			
+			return false;
+		}
+		
 		/**
 		 * Metodo que crea un grupo
 		 *
@@ -198,6 +217,7 @@ public class Grupo {
 			String texto;
 			ObjectId idUsuario;		
 			
+			
 			this.collection = db.getCollection("grupo");
 			
 			//Busco el grupo en el que estamos para luego poder visualizar todos los comentarios.
@@ -264,7 +284,9 @@ public class Grupo {
 		}
 		
 		
-		//Incremento en uno el campo cantidad_usuarios, cada vez que se añade un usuario al grupo.
+		/*
+		 * Incremento en uno el campo cantidad_usuarios, cada vez que se añade un usuario al grupo.
+		 */
 		public void incrementarUsuarios(DB db) {
 			
 			this.collection = db.getCollection("grupo");
@@ -280,8 +302,26 @@ public class Grupo {
 
 		}
 		
+		/*
+		 * Incremento en uno el campo cantidad_usuarios, cada vez que se añade un usuario al grupo.
+		 * */
+		public void decrementarUsuarios(DB db) {
+			
+			this.collection = db.getCollection("grupo");
+
+			this.cantidad_usuarios--;
+
+			BasicDBObject buscarGrupo = new BasicDBObject("_id", this.nombre);
+
+			DBObject updateQuery = new BasicDBObject("$set", new BasicDBObject(
+					"cantidad_usuarios", this.cantidad_usuarios));
+			
+			this.collection.update(buscarGrupo, updateQuery);
+
+		}
+		
 		/**
-		 * Incremento en uno los comentarios escritos
+		 * Incremento en uno los comentarios escritos.
 		 * 
 		 */
 		public void incrementarComentario(DB db) {
@@ -300,6 +340,159 @@ public class Grupo {
 		}
 		
 		
+		/*
+		 * Eliminamos un usuario del grupo en el que estamos.
+		 * 
+		 * */
+		public void eliminarUsuarioGrupo(Usuario user, DB db){
+			
+			this.collection = db.getCollection("grupo");
+			
+			BasicDBObject buscarGrupo = new BasicDBObject("_id", this.nombre);
+
+			DBObject updateQuery = new BasicDBObject("$pull", new BasicDBObject("usuarios", new BasicDBObject("usuario", user.getId())));
+			
+			this.collection.update(buscarGrupo, updateQuery);
+			
+			//Actualizamos la cantidad de usuarios.
+			this.decrementarUsuarios(db);
+			
+		}
+		
+		
+		/*
+		 * Buscamos todos los comentarios del usuario y los borramos.
+		 * */
+		public void eliminarComentariosUsuario(Usuario user, DB db){
+			
+			this.collection = db.getCollection("grupo");
+			int cantComentarios;
+			
+			BasicDBObject buscarGrupo = new BasicDBObject("_id", this.nombre);
+
+			DBObject updateQuery = new BasicDBObject("$pull", new BasicDBObject("comentario", new BasicDBObject("usuario", user.getId())));
+			
+			this.collection.update(buscarGrupo, updateQuery);
+			
+			//Consultamos el grupo para ver cuantos comentarios ha y modificar la variable de cantidad de comentarios.
+			DBCursor cursor = this.collection.find(buscarGrupo);
+			
+			for(DBObject grupo : cursor){
+				
+				if((Integer)grupo.get("cantidad_comentarios")!=0){
+					
+					ArrayList<DBObject> listaComentarios = (ArrayList<DBObject>) grupo.get("comentario");
+				
+					cantComentarios=listaComentarios.size();
+					if(comentarios!=null){
+						
+						this.decrementarComentarios(db, cantComentarios);
+					}else{
+						
+						//No hay comentarios, por lo tanto pasamos 0
+						this.decrementarComentarios(db, 0);
+					}
+				}
+				
+			}
+			
+		}
+		
+		
+		
+		/*
+		 * Método que actualizará el campo cantidad comentarios, a partir de la cantidad
+		 * que se le haya pasado como parámetro. 
+		 * */
+		public void decrementarComentarios(DB db, int cantidadComentarios){
+			
+			this.collection=db.getCollection("grupo");
+			this.cantidad_comentarios=cantidadComentarios;
+			
+			BasicDBObject buscarGrupo = new BasicDBObject("_id", this.nombre);
+
+			DBObject updateQuery = new BasicDBObject("$set", new BasicDBObject(
+					"cantidad_comentarios", this.cantidad_comentarios));
+			
+			this.collection.update(buscarGrupo, updateQuery);
+
+			
+		}
+		
+				
+		/**
+		 * Quitar usuario del grupo, para proceder con esta operación es necesario 
+		 * realizar las siguientes operaciones:
+		 * 
+		 * 1- Eliminar el usuario del grupo.
+		 * 2- Decrementar en 1 la cantidad de usuarios del grupo.
+		 * 3- Borrar todos sus comentarios
+		 * 4- Restar todos sus comentarios de la cantidad total del grupo.
+		 */
+		public void abandonarGrupo(Usuario user, DB db){
+
+			this.collection = db.getCollection("grupo");
+			
+			//Eliminar el usuario.
+			this.eliminarUsuarioGrupo(user, db);
+			
+			//Eliminar los comentarios.
+			this.eliminarComentariosUsuario(user, db);
+			
+			//Comprobar estado del Grupo.
+			this.comprobarGrupo(db);
+		}
+
+		/*
+		 * Comprobará si hay usuarios en el grupo todavia, de ser así cede los permisos
+		 * Admin al siguiente usuario, sino elimina el grupo.
+		 * */
+		public void comprobarGrupo(DB db){
+			
+			this.collection=db.getCollection("grupo");
+			BasicDBObject buscarGrupo = new BasicDBObject("_id", this.nombre);
+			
+			
+			BasicDBObject query = new BasicDBObject();
+			query.put("_id", this.nombre);
+
+			DBCollection col = db.getCollection("grupo");
+
+			DBCursor cursor = col.find(query);
+			
+			for (DBObject grupo : cursor) {
+
+				System.out.println("Estado del grupo "+grupo.get("_id"));
+				System.out.println("Cantidad_Usuarios: "+grupo.get("cantidad_usuarios"));
+				System.out.println("Cantidad_Comentarios: "+grupo.get("cantidad_comentarios"));
+				
+				if((Integer)grupo.get("cantidad_usuarios")<=0){
+					
+					this.borrarGrupo(db);
+					System.out.println("El grupo se ha borrado correctamente.");
+				}else{
+					
+					
+					query = new BasicDBObject("$set", new BasicDBObject(
+							"usuarios.0.admin", true));
+					
+					this.collection.update(buscarGrupo, query);
+					
+					System.out.println("Se han pasado los permisos de Administrador del grupo al siguiente usuario.");
+				}
+
+			}
+		}
+		
+		/*
+		 * 
+		 * */
+		public void cambiarAdministradorGrupo(Usuario user, DB db){
+			
+			
+		}
+		
+
 		/**
 		 * Borrar Grupo
 		 * 
@@ -315,21 +508,6 @@ public class Grupo {
 		}
 
 		
-		
-		/**
-		 * Quitar usuario del grupo
-		 */
-		public void abandonarGrupo(Usuario user, DB db){
-
-			BasicDBObject busqueda = new BasicDBObject("_id", this.nombre);
-
-			DBObject updateQuery = new BasicDBObject("$pull", new BasicDBObject("usuarios", new BasicDBObject("usuario", user.getId())));
-			System.out.println(updateQuery);
-			this.collection = db.getCollection("grupo");
-			this.collection.update(busqueda, updateQuery);
-			
-		}
-
 		
 		///////////////////////////////////////////////METODOS STATIC///////////////////////////////////////////////////
 
@@ -351,13 +529,29 @@ public class Grupo {
 			
 			for (DBObject grupo : cursor) {
 
-				//ObjectId id = (ObjectId) grupo.get("_id");
-				String nombre = (String) grupo.get("nombre");
+				
+				String nombre = (String) grupo.get("_id");
 				int cantidad_usuarios = (int) grupo.get("cantidad_usuarios");
 				int cantidad_comentarios = (int) grupo.get("cantidad_comentarios");
 
-				grupos.add(new Grupo(nombre, cantidad_usuarios, cantidad_comentarios));
 
+				ArrayList<DBObject> usuarios = (ArrayList<DBObject>) grupo.get("usuarios");
+				
+				/*Recorremos el array de usuarios, para comprobar si el usuario que nos han
+				 * pasado coincide y ademas es admin. De ser asi guardamos el grupo.
+				 */
+				for(int i=0; i<usuarios.size();i++){
+					
+					ObjectId idUsuario= (ObjectId) usuarios.get(i).get("usuario");
+					boolean esAdmin = (Boolean) usuarios.get(i).get("admin");
+					
+					if(user.getId().equals(idUsuario)&&esAdmin){
+						
+						//Nos quedamos con ese grupo y lo añadimos al array.
+						grupos.add(new Grupo(nombre, cantidad_usuarios, cantidad_comentarios));
+					}
+					
+				}
 			}
 
 			return grupos;

@@ -4,6 +4,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -79,30 +81,9 @@ public class Principal {
 	
 	public static void crearUsuario(DB db){
 		
-		String nombre,apellidos,correo, password;
-		String[] direccion = new String[4];
-		
-		System.out.println("Introduzca su nombre:");
-		nombre=lector.nextLine();
-		System.out.println("Introduzca sus apellidos:");
-		apellidos=lector.nextLine();
-		System.out.println("Introduzca su correo electronico:");
-		correo=lector.nextLine();
-		System.out.println("Dirección,");
-		System.out.print("Calle: ");
-		direccion[0] = lector.nextLine();
-		System.out.print("Nº: ");
-		direccion[1] = lector.nextLine();
-		System.out.print("Localidad: ");
-		direccion[2] = lector.nextLine();
-		System.out.print("C.P: ");
-		direccion[3] = lector.nextLine();
-		System.out.println("Introduzca su password:");
-		password=lector.nextLine();
-	
 		
 		Usuario newUsuario = new Usuario();
-		newUsuario.crearUsuario(nombre,apellidos,correo,direccion,password, db);
+		newUsuario.crearUsuario(db);
 		
 	}
 	
@@ -126,6 +107,7 @@ public class Principal {
 		}
 		
 	}
+	
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -163,6 +145,7 @@ public class Principal {
 			case 2:
 					System.out.println("Dar de baja usuario.");
 					bajaUsuario(user);
+					opMenu=0;
 				break;
 					
 			

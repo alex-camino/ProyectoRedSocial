@@ -2,6 +2,8 @@ package Clases;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bson.types.ObjectId;
 
@@ -116,6 +118,91 @@ public class Usuario {
 	
 	///////////////////////////////// OPCIONES USUARIO ////////////////////////////////////////////
 	
+	public void crearUsuario(DB db){
+		
+		String nombre,apellidos,correo, password;
+		String[] direccion = new String[4];
+		
+		System.out.println("Introduzca su nombre:");
+		nombre=Principal.lector.nextLine();
+		System.out.println("Introduzca sus apellidos:");
+		apellidos=Principal.lector.nextLine();
+		correo=comprobarCorreo(db);
+		System.out.println("Dirección,");
+		System.out.print("Calle: ");
+		direccion[0] = Principal.lector.nextLine();
+		System.out.print("Nº: ");
+		direccion[1] = Principal.lector.nextLine();
+		System.out.print("Localidad: ");
+		direccion[2] = Principal.lector.nextLine();
+		System.out.print("C.P: ");
+		direccion[3] = Principal.lector.nextLine();
+		System.out.println("Introduzca su password:");
+		password=Principal.lector.nextLine();
+		
+		this.crearUsuario(nombre, apellidos, correo, direccion, password, db);
+	}
+	
+	public String comprobarCorreo(DB db){
+		
+		boolean emailCorrecto, repetir;
+		String email=""; 
+        Pattern plantilla = null;
+        Matcher resultado = null;
+        
+        plantilla = Pattern.compile("^([0-9a-zA-Z]([_.w]*[0-9a-zA-Z])*@([0-9a-zA-Z][-w]*[0-9a-zA-Z].)+([a-zA-Z]{2,9}.)+[a-zA-Z]{2,3})$");
+        
+        do{
+        	
+	        do{
+	        	
+	        	System.out.println("Introduzca su email:");
+	            email=Principal.lector.nextLine();
+	            
+	            resultado = plantilla.matcher(email);
+	            
+	            if(resultado.find()==true){
+	            	
+	            	repetir=false;
+	                     
+	            }else{
+	            	
+	            	repetir=true;
+	                System.out.println("El email que ha introducido es incorrecto. \n"
+	                				  +"Ejemplo de email:  juanito@gmail.com");
+	            }
+	            
+	        }while(repetir);
+       
+        	emailCorrecto=comprobarCorreoUsuario(db, email);
+        	
+        }while(!emailCorrecto);
+        
+        return email;
+	}
+	
+	/*
+	 * Método que comprobará que un correo no se introduce dos veces. 
+	 * */
+	
+	public boolean comprobarCorreoUsuario(DB db, String correo){
+		
+		this.collection = db.getCollection("usuario");
+		
+		DBCursor cursor = collection.find();
+		
+		for (DBObject usuario : cursor) {
+			
+			if(correo.equals(usuario.get("correo"))){
+				
+				System.out.println("El correo introducido ya esta en uso, introduzca otro.");
+				return false;
+			}
+			
+		}
+		
+		return true;
+	}
 	
 	public boolean logearse(String correo, String password, DB db){
 		
@@ -160,7 +247,7 @@ public class Usuario {
 		
 		Date fechaCreacion = new Date();
 		
-		DBCollection collection = db.getCollection("usuario");		;	
+		DBCollection collection = db.getCollection("usuario");	
 		
 		
 		BasicDBObject buscarUsuario = new BasicDBObject("_id", user.getId());
@@ -171,6 +258,9 @@ public class Usuario {
 
 		grupo_1.addUserGrupo(user, db);
 	}
+	
+	
+	
 	
 	/*
 	 * Método que añade un grupo al array de usuarios.

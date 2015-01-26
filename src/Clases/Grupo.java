@@ -189,6 +189,81 @@ public class Grupo {
 			}
 		}
 		
+
+		/*
+		 * Mostrara los usuarios que hay en un determinado grupo que sean de mi localidad.
+		 * */
+		public void mostrarUsuariosLocalidadGrupo(Usuario user, DB db){
+
+			String texto;
+			ObjectId idUsuario;		
+			
+			this.collection = db.getCollection("grupo");
+			
+			//Busco el grupo en el que estamos para luego poder visualizar todos los comentarios.
+			BasicDBObject buscarGrupo = new BasicDBObject("_id", this.nombre);
+			
+			DBCursor cursor = collection.find(buscarGrupo);
+			
+			for (DBObject grupo : cursor) {
+
+				ArrayList<DBObject> usuarios = (ArrayList<DBObject>) grupo.get("usuarios");
+				
+				
+					for(int i=0;i<usuarios.size();i++){
+						
+						idUsuario=(ObjectId) usuarios.get(i).get("usuario");
+						
+						//Creo un nuevo usuario para poder averiguar los datos del usuario.
+						Usuario nuevoUser = new Usuario();
+						nuevoUser.buscarInfoUsuario(idUsuario, db);
+						
+						if(user.getDireccion()[2].equals(nuevoUser.getDireccion()[2])){
+							
+							System.out.println(" ");
+							System.out.println("Usuario: "+nuevoUser.getNombre()+" "+nuevoUser.getApellidos());
+							System.out.println("Dirección: \n"
+											  +"\nCalle: "+nuevoUser.getDireccion()[0]
+											  +"\nNúmero: "+nuevoUser.getDireccion()[1]
+											  +"\nLocalidad: "+nuevoUser.getDireccion()[2]
+											  +"\nCódigo Postal: "+nuevoUser.getDireccion()[3]);
+							System.out.println("\n"
+											  +"================================================");
+							
+						}
+						
+					}
+					
+
+			}
+		}
+		
+		
+		/*
+		 * Mostrara la cantidad de usuarios que hay en un determinado grupo.
+		 * */
+		public void cantidadUsuariosGrupo(Usuario user, DB db){
+
+			String texto;
+			ObjectId idUsuario;		
+			
+			this.collection = db.getCollection("grupo");
+			
+			//Busco el grupo en el que estamos para luego poder visualizar todos los comentarios.
+			BasicDBObject buscarGrupo = new BasicDBObject("_id", this.nombre);
+			
+			DBCursor cursor = collection.find(buscarGrupo);
+			
+			for (DBObject grupo : cursor) {
+
+				System.out.println("Nombre del grupo: "+grupo.get("_id"));
+				System.out.println("Cantidad de usuarios: "+grupo.get("cantidad_usuarios"));
+				System.out.println("Cantidad de comentarios: "+grupo.get("cantidad_comentarios"));
+
+			}
+		}
+		
+		
 		//Incremento en uno el campo cantidad_usuarios, cada vez que se añade un usuario al grupo.
 		public void incrementarUsuarios(DB db) {
 			

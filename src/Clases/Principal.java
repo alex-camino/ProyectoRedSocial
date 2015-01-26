@@ -247,11 +247,12 @@ public class Principal {
 			System.out.println("GESTIÓN DE GRUPOS\n"
 							  +"1-. Crear a un grupo.\n"
 							  +"2-. Unirse a un grupo.\n"
-							  +"3-. Eliminar un grupo.\n"
-							  +"4-. Comentar en un grupo.\n"
+							  +"3-. Comentar en un grupo.\n"
+							  +"4-. Eliminar un grupo.\n"
 							  +"5-. Visualizar comentarios de los grupos\n"
 							  +"6-. Listar los usuarios de mi localidad de un grupo.\n"
-					          +"7-. Salirse de un grupo.\n"
+							  +"7-. Mostrar numero de usuarios por grupo.\n"
+					          +"8-. Salirse de un grupo.\n"
 							  +"0-. Volver.\n");
 			System.out.print("Introduzca la opcion que desea: ");
 			opMenu=Excepciones.enteros();
@@ -274,12 +275,13 @@ public class Principal {
 				break;
 			case 3:
 				
-					//eliminarGrupo();
+					comentarGrupo(user);
+					
 				break;
 					
 			case 4:
 					
-					comentarGrupo(user);
+					//eliminarGrupo();
 				break;
 		
 			case 5:
@@ -290,15 +292,21 @@ public class Principal {
 			
 			case 6:
 					
-					//listarUsuarios();
+					visualizarUsuariosLocalidadGrupo(user);
 					
 				break;
 	
 			case 7:
 					
-					//salirDelGrupo();
+					cantidadUsuariosGrupo(user);
 					
 				break;
+				
+			case 8:
+				
+				//salirDelGrupo();
+				
+			break;
 			
 			default:
 				
@@ -308,7 +316,7 @@ public class Principal {
 		}while(opMenu!=0);
 	}
 
-	
+
 	///////////////// OPCIONES DE GRUPO //////////////////////////////////////
 	
 	private static void crearGrupo(Usuario user) {
@@ -390,7 +398,7 @@ public class Principal {
 
 			}
 
-			System.out.print("Introduzca el grupo en el que desea comentar : ");
+			System.out.print("Introduzca el grupo en el que desea buscar los comentarios : ");
 			opcion = Excepciones.enteros();
 
 			if (opcion<1 || opcion>grupos.size()) {
@@ -413,6 +421,96 @@ public class Principal {
 		
 	}
 
+	/*
+	 * Mostrará los usuarios que hay en un determinado grupo que sean de mi misma localidad.
+	 * */
+	public static void visualizarUsuariosLocalidadGrupo(Usuario user){
+		
+		System.out.println("Puedes visualizar los usuarios de uno de los siguientes grupos: ");
+
+		//Llamamos al metodo mostrar grupos a partir de un usuario
+		ArrayList<Grupo> grupos = Grupo.mostrarGrupos(user, db);
+
+		int opcion=0;
+		boolean repetir;
+
+		do {
+
+			
+			for (int i = 0; i < grupos.size(); i++) {
+
+				System.out.print((i + 1)+ "-. "); 
+				System.out.println(grupos.get(i).getNombre());
+
+			}
+
+			System.out.print("Introduzca el grupo en el que desea buscar los usuarios : ");
+			opcion = Excepciones.enteros();
+
+			if (opcion<1 || opcion>grupos.size()) {
+
+				System.err.println("Tiene que escoger uno de los grupos que aparecen.");
+				repetir=true;
+
+			} else {
+
+				repetir=false;
+				
+				
+
+				grupos.get(opcion-1).mostrarUsuariosLocalidadGrupo(user, db);
+
+			}
+			
+
+		} while (repetir);
+	}
+	
+	/*
+	 * 
+	 * */
+	
+	private static void cantidadUsuariosGrupo(Usuario user) {
+		
+		
+		System.out.println("Puedes visualizar la cantidad de usuarios de uno de los siguientes grupos: ");
+
+		//Llamamos al metodo mostrar grupos a partir de un usuario
+		ArrayList<Grupo> grupos = Grupo.mostrarGrupos(user, db);
+
+		int opcion=0;
+		boolean repetir;
+
+		do {
+
+			
+			for (int i = 0; i < grupos.size(); i++) {
+
+				System.out.print((i + 1)+ "-. "); 
+				System.out.println(grupos.get(i).getNombre());
+
+			}
+
+			System.out.print("Introduzca el grupo del que desees saber la cantidad de usuarios que tiene : ");
+			opcion = Excepciones.enteros();
+
+			if (opcion<1 || opcion>grupos.size()) {
+
+				System.err.println("Tiene que escoger uno de los grupos que aparecen.");
+				repetir=true;
+
+			} else {
+
+				repetir=false;
+
+				grupos.get(opcion-1).cantidadUsuariosGrupo(user, db);
+
+			}
+			
+
+		} while (repetir);
+		
+	}
 	private static void salirDelGrupo() {
 		// TODO Auto-generated method stub.
 		

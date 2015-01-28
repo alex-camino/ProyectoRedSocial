@@ -143,6 +143,10 @@ public class Usuario {
 		this.crearUsuario(nombre, apellidos, correo, direccion, password, db);
 	}
 	
+	/*
+	 * Método que comprueba que se introduzca un correo correctamente y si es así
+	 * que llame al metodo que compruebe que no existe en la BBDD.
+	 * */
 	public String comprobarCorreo(DB db){
 		
 		boolean emailCorrecto, repetir;
@@ -204,14 +208,14 @@ public class Usuario {
 		return true;
 	}
 	
+	/*
+	 * Método para logearse, consultará a partir de un correo y un password, que el
+	 * usuario existe.
+	 * */
 	public boolean logearse(String correo, String password, DB db){
 		
 		this.collection = db.getCollection("usuario");	
-		
-		
-		/* Con la clase BasicDBObject tambien creamos objetos con los que hacer consultas */
-		
-		//BasicDBObject query = new BasicDBObject("correo","alcam").append("password","321");
+			
 		BasicDBObject query = new BasicDBObject();
 		query.put("correo",correo);
 		query.put("password", password);

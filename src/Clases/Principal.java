@@ -157,7 +157,10 @@ public class Principal {
 		}while(opMenu!=0);
 	}
 	
-	
+	/*
+	 * Método que elimina toda la información del usuario y de los grupos en los que estaba
+	 * unido el usuario.
+	 * */
 	private static void bajaUsuario(Usuario user) {
 		
 
@@ -237,7 +240,8 @@ public class Principal {
 			
 			case 2:
 				
-					user.unirseGrupo(user, db);
+					unirseGrupo(user);
+					
 				break;
 			case 3:
 				
@@ -285,6 +289,7 @@ public class Principal {
 
 	///////////////// OPCIONES DE GRUPO //////////////////////////////////////
 	
+	
 	private static void crearGrupo(Usuario user) {
 		
 
@@ -314,6 +319,10 @@ public class Principal {
 		
 	}
 	
+	private static void unirseGrupo(Usuario user){
+		
+		user.unirseGrupo(user, db);
+	}
 	
 	private static void comentarGrupo(Usuario user) {
 		
@@ -368,7 +377,13 @@ public class Principal {
 
 		} while (repetir);
 	}
-		
+	
+	
+	/*
+	 * Visualizará todos los comentarios que ha hecho el usuario en un determinado
+	 * grupo. Se mostrarán todos aquellos grupos en los que este inscrito el Usuario.
+	 * 
+	 * */
 	private static void visualizarComentariosGrupos(Usuario user) {
 		
 		System.out.println("Puedes visualizar los comentarios de uno de los siguientes grupos: ");
@@ -532,6 +547,8 @@ public class Principal {
 		} while (repetir);
 		
 	}
+	
+	
 	private static void salirDelGrupo(Usuario user) {
 		
 		

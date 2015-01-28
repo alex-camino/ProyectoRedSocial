@@ -16,7 +16,7 @@ import com.mongodb.DBObject;
 
 public class Grupo {
 
-	//private ObjectId id;
+	
 		private String nombre;
 		private int cantidad_usuarios;
 		private int cantidad_comentarios;
@@ -31,7 +31,6 @@ public class Grupo {
 
 		public Grupo( String nombre, int total_usuarios,int total_comentarios) {
 
-			//this.id = id;
 			this.nombre = nombre;
 			this.cantidad_usuarios = total_usuarios;
 			this.cantidad_comentarios = total_comentarios;
@@ -39,14 +38,7 @@ public class Grupo {
 		}
 
 		/////////////// SETTERS Y GETTERS /////////////////////////////
-		
-		/*public ObjectId getId() {
-			return id;
-		}
 
-		public void setId(ObjectId id) {
-			this.id = id;
-		}*/
 
 		public String getNombre() {
 			return nombre;
@@ -95,7 +87,7 @@ public class Grupo {
 		}
 		
 		/**
-		 * Metodo que crea un grupo
+		 * Metodo que crea un grupo, con todos los parametros necesarios.
 		 *
 		 */
 		public void crearGrupo(String nombre, DB db, Usuario user) {
@@ -484,13 +476,6 @@ public class Grupo {
 			}
 		}
 		
-		/*
-		 * 
-		 * */
-		public void cambiarAdministradorGrupo(Usuario user, DB db){
-			
-			
-		}
 		
 
 		/**
